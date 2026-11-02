@@ -1,368 +1,302 @@
-\# Kubernetes Blue-Green Deployment
+# 🚀 Kubernetes Blue-Green Deployment
 
+### Zero-Downtime Deployment Strategy Using Docker, Kubernetes & Minikube
 
+A hands-on DevOps project demonstrating the **Blue-Green Deployment strategy** using Docker containers and Kubernetes. Two application versions run in separate environments, and a Kubernetes Service controls which version receives traffic.
 
-\## Project Overview
+The project demonstrates application deployment, traffic switching, and rollback using a local Kubernetes cluster.
 
+---
 
+## 📌 Project Overview
 
-This project demonstrates the Blue-Green Deployment strategy using Docker and Kubernetes with Minikube.
+Blue-Green Deployment is a release strategy that maintains two application environments:
 
+- 🔵 **Blue Environment:** Current application — Version 1.0
+- 🟢 **Green Environment:** New application — Version 2.0
 
+Both versions are deployed independently in Kubernetes. Traffic is directed to the selected environment using a Kubernetes Service selector.
 
-Two application versions are deployed independently: Blue (Version 1.0) and Green (Version 2.0). A Kubernetes Service controls which version receives application traffic.
+When the new version is ready, traffic can be switched from Blue to Green. If rollback is required, traffic can be redirected to Blue.
 
+**Deployment environment:** Local Kubernetes cluster using Minikube.
 
+---
 
-The project demonstrates how to switch between application versions and roll back to the previous version by updating the Service selector.
-
-
-
-\## Objectives
-
-
-
-\- Deploy two application versions using Kubernetes Deployments.
-
-\- Containerize the applications using Docker.
-
-\- Run the containers locally using Minikube.
-
-\- Route application traffic through a Kubernetes Service.
-
-\- Switch traffic between Blue and Green environments.
-
-\- Demonstrate rollback to the previous application version.
-
-
-
-\## Technologies Used
-
-
-
-\- Docker
-
-\- Kubernetes
-
-\- Minikube
-
-\- kubectl
-
-\- NGINX
-
-\- YAML
-
-\- HTML and CSS
-
-\- Windows PowerShell
-
-
-
-\## Architecture
-
-
-
-The application follows this deployment flow:
-
-
-
-User Browser → Minikube NodePort Service → Selected Application Pods
-
-
-
-The Kubernetes Service uses labels to select the active environment.
-
-
-
-\- Blue Environment: Version 1.0
-
-\- Green Environment: Version 2.0
-
-
-
-Both deployments have two replicas.
-
-
-
-\## Project Structure
-
-
+## 🏗️ Architecture
 
 ```text
+                       User / Browser
+                              |
+                              v
+                    Kubernetes Service
+                       NodePort: 30080
+                              |
+                   Service Label Selector
+                              |
+                +-------------+-------------+
+                |                           |
+                v                           v
+          Blue Environment            Green Environment
+          Version 1.0                 Version 2.0
+                |                           |
+          2 Application Pods          2 Application Pods
+                |                           |
+                +-------------+-------------+
+                              |
+                       Minikube Cluster
+```
 
+The Service selector determines which environment receives application traffic.
+
+- `version: blue` routes traffic to Blue Pods.
+- `version: green` routes traffic to Green Pods.
+
+---
+
+## 🛠️ Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Docker | Containerizing the application |
+| Kubernetes | Managing application deployments and Pods |
+| Minikube | Running Kubernetes locally |
+| kubectl | Managing Kubernetes resources |
+| NGINX | Serving the application pages |
+| YAML | Defining Kubernetes resources |
+| HTML & CSS | Creating the application pages |
+| PowerShell | Executing deployment commands on Windows |
+
+---
+
+## 📂 Project Structure
+
+```text
 kubernetes-blue-green-deployment/
-
+│
 ├── app/
-
 │   ├── blue/
-
-│   │   ├── index.html
-
-│   │   └── Dockerfile
-
+│   │   ├── Dockerfile
+│   │   └── index.html
+│   │
 │   ├── green/
-
-│   │   ├── index.html
-
-│   │   └── Dockerfile
-
+│   │   ├── Dockerfile
+│   │   └── index.html
+│   │
 │   └── Dockerfile
-
+│
 ├── k8s/
-
 │   ├── blue-deployment.yaml
-
 │   ├── green-deployment.yaml
-
 │   └── service.yaml
-
+│
 ├── screenshots/
-
+│
+├── .gitignore
 └── README.md
-
 ```
 
+---
 
+## ⚙️ Deployment Workflow
 
-\## Deployment Process
+### Step 1: Start Minikube
 
-
-
-\### 1. Start Minikube
-
-
+Start the local Kubernetes cluster using Docker as the driver.
 
 ```powershell
-
 minikube start --driver=docker
-
 ```
 
-
-
-\### 2. Build the Docker Images
-
-
+Verify the cluster:
 
 ```powershell
+kubectl get nodes
+```
 
+### Step 2: Build Docker Images
+
+Build the Blue and Green application images.
+
+```powershell
 docker build -t blue-green-app:1.0 ./app/blue
-
 docker build -t blue-green-app:2.0 ./app/green
-
 ```
 
+### Step 3: Load Images into Minikube
 
-
-\### 3. Load Images into Minikube
-
-
+Make the locally built images available to the Kubernetes cluster.
 
 ```powershell
-
 minikube image load blue-green-app:1.0
-
 minikube image load blue-green-app:2.0
-
 ```
 
+### Step 4: Deploy Both Environments
 
-
-\### 4. Deploy Both Application Versions
-
-
+Create the Blue and Green Kubernetes Deployments.
 
 ```powershell
-
 kubectl apply -f k8s/blue-deployment.yaml
-
 kubectl apply -f k8s/green-deployment.yaml
-
 ```
 
-
-
-\### 5. Configure the Service
-
-
+Verify the deployments and Pods.
 
 ```powershell
-
-kubectl apply -f k8s/service.yaml
-
-```
-
-
-
-\### 6. Verify Deployments and Pods
-
-
-
-```powershell
-
 kubectl get deployments
-
 kubectl get pods --show-labels
-
-kubectl describe service blue-green-service
-
 ```
 
+### Step 5: Create the Kubernetes Service
 
-
-\### 7. Access the Application
-
-
+Apply the Service configuration.
 
 ```powershell
+kubectl apply -f k8s/service.yaml
+```
 
+The Service uses NodePort `30080` and selects the application Pods using their labels.
+
+### Step 6: Access the Application
+
+Run:
+
+```powershell
 minikube service blue-green-service --url
-
 ```
 
+Open the URL returned by Minikube in your browser.
 
+---
 
-Open the URL printed in the terminal in a browser.
+## 🔄 Blue-Green Traffic Switching
 
+The Kubernetes Service controls which environment receives traffic.
 
+### Blue Environment — Version 1.0
 
-\## Blue-Green Traffic Switching
-
-
-
-The Kubernetes Service initially selects the Blue Pods using this selector:
-
-
+The Service selector for Blue is:
 
 ```yaml
-
 selector:
-
-&#x20; app: blue-green-app
-
-&#x20; version: blue
-
+  app: blue-green-app
+  version: blue
 ```
 
+When this selector is active, requests are routed to the Blue application Pods.
 
+### Switch to Green — Version 2.0
 
-To switch traffic to Green, update the selector in `k8s/service.yaml`:
-
-
+Update `k8s/service.yaml` to use:
 
 ```yaml
-
 selector:
-
-&#x20; app: blue-green-app
-
-&#x20; version: green
-
+  app: blue-green-app
+  version: green
 ```
-
-
 
 Apply the updated configuration:
 
-
-
 ```powershell
-
 kubectl apply -f k8s/service.yaml
-
 ```
-
-
 
 Verify the Service selector and endpoints:
 
-
-
 ```powershell
-
 kubectl describe service blue-green-service
-
 kubectl get endpoints blue-green-service
-
 ```
 
+Refresh the application page to verify that the Green application is served.
 
+---
 
-Refresh the application in the browser to verify that Version 2.0 is served.
+## ↩️ Rollback to Blue
 
+If the new application version needs to be rolled back, update the Service selector in `k8s/service.yaml`:
 
+```yaml
+selector:
+  app: blue-green-app
+  version: blue
+```
 
-\## Rollback
-
-
-
-To roll back to Blue, change the Service selector from `version: green` to `version: blue` in `k8s/service.yaml`.
-
-
-
-Apply the change:
-
-
+Apply the configuration:
 
 ```powershell
-
 kubectl apply -f k8s/service.yaml
-
 ```
 
+Verify the active selector:
 
+```powershell
+kubectl describe service blue-green-service
+```
 
-Verify the selector and refresh the browser to confirm that Version 1.0 is served.
+Refresh the browser to confirm that **Blue Environment — Version 1.0** is served again.
 
+This demonstrates how traffic can be redirected to the previous application version without deleting the Green Deployment.
 
+---
 
-\## Screenshots
+## 📸 Project Screenshots
 
+### 1. Blue Environment — Version 1.0
 
+![Blue Environment](screenshots/blue-environment.png)
 
-Add the screenshots captured during deployment and testing in the `screenshots` folder.
+### 2. Green Environment — Version 2.0
 
+![Green Environment](screenshots/green-environment.png)
 
+### 3. Rollback to Blue
 
-Examples:
+![Blue Rollback](screenshots/blue-rollback.png)
 
+### 4. Service Selector — Green
 
+![Green Service Selector](screenshots/green-service-selector.png)
 
-\- Blue application: `screenshots/blue-environment.png`
+### 5. Service Selector — Blue
 
-\- Green application: `screenshots/green-environment.png`
+![Blue Service Selector](screenshots/blue-service-selector.png)
 
-\- Rollback: `screenshots/blue-rollback.png`
+### 6. Kubernetes Deployments
 
-\- Kubernetes deployments: `screenshots/deployments.png`
+![Kubernetes Deployments](screenshots/deployments.png)
 
-\- Kubernetes Pods: `screenshots/pods.png`
+### 7. Kubernetes Pods
 
+![Kubernetes Pods](screenshots/pods.png)
 
+> **Note:** Ensure these image filenames match the actual files in your `screenshots` folder. Rename the files or update the paths above if necessary.
 
-Update these paths to match your actual screenshot filenames.
+---
 
+## 🎯 Key Learnings
 
+- Containerizing applications with Docker.
+- Deploying multiple application versions using Kubernetes.
+- Managing Deployments and Pods.
+- Configuring Kubernetes Services, labels, and selectors.
+- Switching traffic between Blue and Green environments.
+- Performing rollback by updating a Service selector.
+- Running and troubleshooting a local Kubernetes cluster with Minikube.
 
-\## Key Learnings
+---
 
+## ✅ Project Outcome
 
+Successfully demonstrated a local Blue-Green Deployment workflow with two application versions, Kubernetes-based traffic switching, and rollback to the previous version.
 
-\- Deploying multiple application versions in Kubernetes.
+The project provides practical experience with containerization, Kubernetes resource management, and application release strategies.
 
-\- Building and loading Docker images into Minikube.
+---
 
-\- Using Kubernetes labels and selectors to route traffic.
+## 👨‍💻 Author
 
-\- Switching application traffic between environments.
+**Bevara Raghunadh**
 
-\- Performing a rollback by changing a Kubernetes Service selector.
-
-
-
-\## Conclusion
-
-
-
-This project demonstrates a local Blue-Green Deployment workflow using Docker, Kubernetes, and Minikube. It provides practical experience with application deployment, Service-based traffic switching, and rollback.
-
+This project was created as a hands-on learning project to practice Docker, Kubernetes, and deployment strategies.
