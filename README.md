@@ -241,35 +241,27 @@ This demonstrates how traffic can be redirected to the previous application vers
 
 ---
 
-## 📸 Project Screenshots
+## ## 📸 Project Screenshots
 
 ### 1. Blue Environment — Version 1.0
 
-![Blue Environment](screenshots/blue-environment.png)
+Shows the original application version running on Kubernetes.
 
 ### 2. Green Environment — Version 2.0
 
-![Green Environment](screenshots/green-environment.png)
+Shows the updated application version running on Kubernetes.
 
 ### 3. Rollback to Blue
 
-![Blue Rollback](screenshots/blue-rollback.png)
+Demonstrates switching application traffic back to Version 1.0.
 
-### 4. Service Selector — Green
+### 4. Traffic Switch to Green
 
-![Green Service Selector](screenshots/green-service-selector.png)
+Shows the Kubernetes Service selector pointing to the Green environment and its Pods.
 
-### 5. Service Selector — Blue
+### 5. Traffic Switch to Blue
 
-![Blue Service Selector](screenshots/blue-service-selector.png)
-
-### 6. Kubernetes Deployments
-
-![Kubernetes Deployments](screenshots/deployments.png)
-
-### 7. Kubernetes Pods
-
-![Kubernetes Pods](screenshots/pods.png)
+Shows the Kubernetes Service selector pointing back to the Blue environment and its Pods.
 
 > **Note:** Ensure these image filenames match the actual files in your `screenshots` folder. Rename the files or update the paths above if necessary.
 
